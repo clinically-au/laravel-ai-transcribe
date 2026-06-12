@@ -84,8 +84,9 @@ Usage: `Transcription::fromStorage('consult.mp3')->using('aws')`.
 3. Poll `GetTranscriptionJob` every 2s with capped backoff until
    `COMPLETED` / `FAILED` or `$timeout` exceeded.
 4. On success: fetch transcript JSON from S3, parse via `TranscriptParser`,
-   build `TranscriptionResponse`. `Usage` carries audio duration in seconds
-   (Transcribe bills per second, not tokens); `Meta` carries job name + region.
+   build `TranscriptionResponse`. `Usage` is empty (the SDK's `Usage` is
+   token-based; Transcribe bills per second — duration is derivable from the
+   last segment's end time); `Meta` carries provider name + model.
 5. **`finally`:** delete the uploaded audio object and the transcript JSON
    object — ephemeral S3 lifecycle, nothing persists (PHI minimisation).
    Deletion is best-effort; failures log a warning, never mask the result.
