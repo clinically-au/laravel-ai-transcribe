@@ -24,6 +24,7 @@ final class TranscriptParser
         $text = $results['transcripts'][0]['transcript'] ?? '';
 
         $segments = (new Collection($results['audio_segments'] ?? []))
+            ->filter(fn (mixed $segment): bool => is_array($segment))
             ->map(fn (array $segment): TranscriptionSegment => new TranscriptionSegment(
                 $segment['transcript'] ?? '',
                 $segment['speaker_label'] ?? '',

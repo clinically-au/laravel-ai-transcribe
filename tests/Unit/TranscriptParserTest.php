@@ -32,9 +32,32 @@ it('parses a diarized transcript into speaker segments', function () {
 
     $second = $parsed->segments->last();
 
-    expect($second->speaker)->toBe('spk_1')
+    expect($second->text)->toBe('Hi, how are you?')
+        ->and($second->speaker)->toBe('spk_1')
         ->and($second->startSeconds)->toBe(1.8)
         ->and($second->endSeconds)->toBe(3.4);
+});
+
+it('returns an empty transcript when results are absent', function () {
+    $parsed = (new TranscriptParser)->parse('{"jobName":"x","status":"COMPLETED"}');
+
+    expect($parsed->text)->toBe('')
+        ->and($parsed->segments)->toBeEmpty();
+});
+
+it('skips malformed segment entries', function () {
+    $parsed = (new TranscriptParser)->parse(json_encode([
+        'results' => [
+            'transcripts' => [['transcript' => 'Hello.']],
+            'audio_segments' => [
+                'corrupt-entry',
+                ['transcript' => 'Hello.', 'speaker_label' => 'spk_0', 'start_time' => '0.0', 'end_time' => '1.0'],
+            ],
+        ],
+    ]));
+
+    expect($parsed->segments)->toHaveCount(1)
+        ->and($parsed->segments->first()->text)->toBe('Hello.');
 });
 
 it('rejects invalid json', function () {
