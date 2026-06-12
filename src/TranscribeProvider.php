@@ -16,6 +16,9 @@ final class TranscribeProvider extends Provider implements TranscriptionProvider
     use GeneratesTranscriptions;
     use HasTranscriptionGateway;
 
+    /**
+     * @param  array<string, mixed>  $config
+     */
     public function __construct(
         protected array $config,
         protected Dispatcher $events,
@@ -23,6 +26,8 @@ final class TranscribeProvider extends Provider implements TranscriptionProvider
 
     /**
      * Get the credentials for the underlying AI provider.
+     *
+     * @return array<string, string>
      */
     public function providerCredentials(): array
     {
@@ -35,6 +40,14 @@ final class TranscribeProvider extends Provider implements TranscriptionProvider
 
     /**
      * Get the provider connection configuration other than the driver, key, and name.
+     *
+     * @return array{
+     *     region: string,
+     *     bucket: ?string,
+     *     prefix: string,
+     *     language: string,
+     *     use_default_credential_provider: bool
+     * }
      */
     public function additionalConfiguration(): array
     {

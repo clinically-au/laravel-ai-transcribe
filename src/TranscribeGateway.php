@@ -41,6 +41,12 @@ final class TranscribeGateway implements TranscriptionGateway
         int $timeout = 30,
         array $providerOptions = [],
     ): TranscriptionResponse {
+        if (! $provider instanceof TranscribeProvider) {
+            throw new InvalidArgumentException(
+                'The aws-transcribe gateway requires a TranscribeProvider instance.'
+            );
+        }
+
         $config = $provider->additionalConfiguration();
 
         $bucket = $config['bucket'] ?? null;
@@ -215,7 +221,7 @@ final class TranscribeGateway implements TranscriptionGateway
     /**
      * Get (or lazily build) the Transcribe client for the provider.
      */
-    protected function transcribe(TranscriptionProvider $provider): TranscribeServiceClient
+    protected function transcribe(TranscribeProvider $provider): TranscribeServiceClient
     {
         return $this->transcribeClient ??= new TranscribeServiceClient($this->awsClientConfig($provider));
     }
@@ -223,7 +229,7 @@ final class TranscribeGateway implements TranscriptionGateway
     /**
      * Get (or lazily build) the S3 client for the provider.
      */
-    protected function s3(TranscriptionProvider $provider): S3Client
+    protected function s3(TranscribeProvider $provider): S3Client
     {
         return $this->s3Client ??= new S3Client($this->awsClientConfig($provider));
     }
@@ -233,7 +239,7 @@ final class TranscribeGateway implements TranscriptionGateway
      *
      * @return array<string, mixed>
      */
-    protected function awsClientConfig(TranscriptionProvider $provider): array
+    protected function awsClientConfig(TranscribeProvider $provider): array
     {
         $config = $provider->additionalConfiguration();
         $credentials = $provider->providerCredentials();
