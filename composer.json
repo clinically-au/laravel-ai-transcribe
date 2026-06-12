@@ -1,0 +1,42 @@
+{
+    "name": "clinically/laravel-ai-transcribe",
+    "description": "Amazon Transcribe driver for the official Laravel AI SDK.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.4",
+        "aws/aws-sdk-php": "^3.339",
+        "illuminate/support": "^12.0|^13.0",
+        "laravel/ai": "^0.7"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^10.0|^11.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.0"
+    },
+    "autoload": {
+        "psr-4": { "Clinically\\AiTranscribe\\": "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "Clinically\\AiTranscribe\\Tests\\": "tests/" }
+    },
+    "extra": {
+        "laravel": {
+            "providers": ["Clinically\\AiTranscribe\\AiTranscribeServiceProvider"]
+        }
+    },
+    "scripts": {
+        "test": "pest",
+        "analyse": "phpstan analyse",
+        "format": "pint"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
