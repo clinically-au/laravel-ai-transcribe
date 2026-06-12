@@ -10,6 +10,9 @@ use Clinically\AiTranscribe\Exceptions\TranscriptionTimedOutException;
 use Clinically\AiTranscribe\TranscribeGateway;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Sleep;
+use Laravel\Ai\Contracts\Files\TranscribableAudio;
+use Laravel\Ai\Contracts\Gateway\TranscriptionGateway;
+use Laravel\Ai\Contracts\Providers\TranscriptionProvider;
 use Laravel\Ai\Files\Base64Audio;
 use Laravel\Ai\Responses\TranscriptionResponse;
 
@@ -185,6 +188,51 @@ it('requires a configured bucket', function () {
         new Base64Audio(base64_encode('bytes'), 'audio/mpeg'),
     );
 })->throws(InvalidArgumentException::class, 'bucket');
+
+it('rejects providers that are not the aws transcribe provider', function () {
+    $transcribeCommands = [];
+    $s3Commands = [];
+
+    $gateway = new TranscribeGateway(
+        mockedTranscribe(mockedHandler([], $transcribeCommands)),
+        mockedS3(mockedHandler([], $s3Commands)),
+    );
+
+    $other = new class implements TranscriptionProvider
+    {
+        public function transcribe(
+            TranscribableAudio $audio,
+            ?string $language = null,
+            bool $diarize = false,
+            ?string $model = null,
+            ?int $timeout = null,
+            array $providerOptions = [],
+        ): TranscriptionResponse {
+            throw new RuntimeException('Unused.');
+        }
+
+        public function transcriptionGateway(): TranscriptionGateway
+        {
+            throw new RuntimeException('Unused.');
+        }
+
+        public function useTranscriptionGateway(TranscriptionGateway $gateway): self
+        {
+            return $this;
+        }
+
+        public function defaultTranscriptionModel(): string
+        {
+            return 'standard';
+        }
+    };
+
+    $gateway->generateTranscription(
+        $other,
+        'standard',
+        new Base64Audio(base64_encode('bytes'), 'audio/mpeg'),
+    );
+})->throws(InvalidArgumentException::class, 'The aws-transcribe gateway requires a TranscribeProvider instance.');
 
 it('throws and still cleans up when the job fails', function () {
     Sleep::fake();
