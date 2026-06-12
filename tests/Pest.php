@@ -3,18 +3,21 @@
 declare(strict_types=1);
 
 use Aws\CommandInterface;
+use Aws\Exception\AwsException;
 use Aws\MockHandler;
+use Aws\ResultInterface;
 use Aws\S3\S3Client;
 use Aws\TranscribeService\TranscribeServiceClient;
+use Clinically\AiTranscribe\Tests\TestCase;
 use Clinically\AiTranscribe\TranscribeProvider;
 
-uses(Clinically\AiTranscribe\Tests\TestCase::class)->in('Unit', 'Feature');
+uses(TestCase::class)->in('Unit', 'Feature');
 
 /**
  * Build a MockHandler that records each command's name and params
  * into $commands and returns the queued results in order.
  *
- * @param  array<int, \Aws\ResultInterface|\Aws\Exception\AwsException>  $results
+ * @param  array<int, ResultInterface|AwsException>  $results
  * @param  array<int, array{name: string, params: array<string, mixed>}>  $commands
  */
 function mockedHandler(array $results, array &$commands): MockHandler
