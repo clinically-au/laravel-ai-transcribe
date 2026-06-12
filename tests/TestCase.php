@@ -30,5 +30,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         ]);
 
         $app['config']->set('ai.default_for_transcription', 'aws');
+        $app['config']->set('ai.default', 'aws');
     }
 }

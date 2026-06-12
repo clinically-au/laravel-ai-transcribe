@@ -4,11 +4,22 @@ declare(strict_types=1);
 
 namespace Clinically\AiTranscribe;
 
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Ai\Ai;
 
-class AiTranscribeServiceProvider extends ServiceProvider
+final class AiTranscribeServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function boot(): void
+    {
+        if (! class_exists(Ai::class)) {
+            return;
+        }
 
-    public function boot(): void {}
+        Ai::extend('aws-transcribe', fn (Application $app, array $config) => new TranscribeProvider(
+            $config,
+            $app->make(Dispatcher::class),
+        ));
+    }
 }
