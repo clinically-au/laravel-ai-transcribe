@@ -1,0 +1,33 @@
+{
+    "jobName": "job-diarized",
+    "accountId": "123456789012",
+    "status": "COMPLETED",
+    "results": {
+        "transcripts": [
+            { "transcript": "Hello there. Hi, how are you?" }
+        ],
+        "speaker_labels": {
+            "speakers": 2,
+            "segments": []
+        },
+        "audio_segments": [
+            {
+                "id": 0,
+                "transcript": "Hello there.",
+                "start_time": "0.0",
+                "end_time": "1.5",
+                "speaker_label": "spk_0",
+                "items": [0, 1]
+            },
+            {
+                "id": 1,
+                "transcript": "Hi, how are you?",
+                "start_time": "1.8",
+                "end_time": "3.4",
+                "speaker_label": "spk_1",
+                "items": [2, 3, 4, 5]
+            }
+        ],
+        "items": []
+    }
+}
