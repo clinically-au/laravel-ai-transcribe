@@ -25,7 +25,10 @@ Amazon Transcribe (batch) driver for the official `laravel/ai` SDK.
 - `model === 'standard'` means no `ModelSettings`; any other model name is sent
   as a custom language model (`ModelSettings.LanguageModelName`).
 - `$providerOptions` are merged into the job request **last** via
-  `array_replace_recursive` — they win over everything.
+  `array_replace_recursive` — they win over everything. That means they can
+  redirect `OutputBucketName`/`OutputKey` away from the ephemeral-cleanup
+  path: they are a trusted developer escape hatch, never expose them to
+  untrusted input.
 - Cleanup failures log warnings; they never mask the transcription result or error.
 
 ## Commands

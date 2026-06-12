@@ -56,7 +56,11 @@ events all work for free through the SDK.
 'default_for_transcription' => 'aws',
 ```
 
-Usage: `Transcription::fromStorage('consult.mp3')->using('aws')`.
+Usage: `Transcription::fromStorage('consult.mp3')->generate()` (provider
+selected via `default_for_transcription`; the SDK has no `using()` method —
+corrected post-implementation). The `use_default_credential_provider` key
+above was dropped during implementation: credential selection is implied by
+the presence/absence of explicit keys.
 
 ## Components
 

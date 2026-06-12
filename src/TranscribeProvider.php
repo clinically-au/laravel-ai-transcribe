@@ -45,8 +45,7 @@ final class TranscribeProvider extends Provider implements TranscriptionProvider
      *     region: string,
      *     bucket: ?string,
      *     prefix: string,
-     *     language: string,
-     *     use_default_credential_provider: bool
+     *     language: string
      * }
      */
     public function additionalConfiguration(): array
@@ -56,7 +55,6 @@ final class TranscribeProvider extends Provider implements TranscriptionProvider
             'bucket' => $this->config['bucket'] ?? null,
             'prefix' => trim($this->config['prefix'] ?? 'transcriptions', '/'),
             'language' => $this->config['language'] ?? 'en-AU',
-            'use_default_credential_provider' => $this->config['use_default_credential_provider'] ?? true,
         ];
     }
 
