@@ -225,6 +225,26 @@ it('rejects providers that are not the aws transcribe provider', function () {
         {
             return 'standard';
         }
+
+        public function name(): string
+        {
+            return 'other';
+        }
+
+        public function driver(): string
+        {
+            return 'other';
+        }
+
+        public function providerCredentials(): array
+        {
+            return [];
+        }
+
+        public function additionalConfiguration(): array
+        {
+            return [];
+        }
     };
 
     $gateway->generateTranscription(
