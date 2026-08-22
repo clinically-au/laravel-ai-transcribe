@@ -10,6 +10,8 @@ use Illuminate\Support\Sleep;
 use Laravel\Ai\Ai;
 use Laravel\Ai\Events\TranscriptionGenerated;
 use Laravel\Ai\Files\Base64Audio;
+use Laravel\Ai\Prompts\TranscriptionPrompt;
+use Laravel\Ai\Transcription;
 
 it('resolves the aws-transcribe driver from the ai manager', function () {
     $provider = Ai::transcriptionProvider('aws');
@@ -58,4 +60,17 @@ it('transcribes end to end through the sdk provider', function () {
         ->and($response->segments)->toHaveCount(2);
 
     Event::assertDispatched(TranscriptionGenerated::class);
+});
+
+it('supports sdk transcription fakes without calling aws', function () {
+    Transcription::fake(['Synthetic transcript.'])->preventStrayTranscriptions();
+
+    $response = Transcription::fromBase64(base64_encode('synthetic audio'), 'audio/mpeg')
+        ->diarize()
+        ->generate(provider: 'aws');
+
+    expect($response->text)->toBe('Synthetic transcript.');
+
+    Transcription::assertGenerated(fn (TranscriptionPrompt $prompt): bool => $prompt->isDiarized()
+        && $prompt->provider->name() === 'aws');
 });
