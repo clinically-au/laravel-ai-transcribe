@@ -86,6 +86,33 @@ Laravel AI SDK — this package only adds the driver.
   `transcribe:GetTranscriptionJob`, `transcribe:DeleteTranscriptionJob`,
   `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` on the configured bucket/prefix.
 
+### Job ownership tags
+
+Configure optional job tags on the provider connection in `config/ai.php`:
+
+```php
+'tags' => [
+    'Application' => 'stream',
+    'Environment' => 'staging',
+],
+```
+
+The driver converts this string map to AWS's `Tags` list on StartTranscriptionJob.
+Without configured tags, existing requests are unchanged. Existing jobs are not
+retagged. Drain or explicitly handle untagged in-flight jobs before restricting
+Get/Delete to ownership tags.
+
+**IAM enforces ownership, not these defaults.** Require exact application and
+environment request tags on StartTranscriptionJob and matching resource tags on
+GetTranscriptionJob/DeleteTranscriptionJob. Start requires Resource `*`; Get/Delete
+support transcription-job ARNs. Restrict output bucket/key and S3 access separately;
+do not grant unrestricted listing or retagging. Review other grants for bypasses.
+
+Trusted `providerOptions` still merge last via `array_replace_recursive`, including
+AWS-format `Tags` entries by numeric index. They can override configured tags;
+an IAM ownership policy must reject foreign values. Never expose provider options
+to untrusted input or treat a configured tag as proof of authorization.
+
 ## Behaviour notes
 
 - The gateway polls the batch job with capped backoff (2s → 10s) up to the

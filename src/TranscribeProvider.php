@@ -45,7 +45,8 @@ final class TranscribeProvider extends Provider implements TranscriptionProvider
      *     region: string,
      *     bucket: ?string,
      *     prefix: string,
-     *     language: string
+     *     language: string,
+     *     tags: array<string, string>
      * }
      */
     public function additionalConfiguration(): array
@@ -55,6 +56,7 @@ final class TranscribeProvider extends Provider implements TranscriptionProvider
             'bucket' => $this->config['bucket'] ?? null,
             'prefix' => trim($this->config['prefix'] ?? 'transcriptions', '/'),
             'language' => $this->config['language'] ?? 'en-AU',
+            'tags' => $this->config['tags'] ?? [],
         ];
     }
 
