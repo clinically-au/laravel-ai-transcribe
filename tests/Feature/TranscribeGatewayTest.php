@@ -70,6 +70,7 @@ it('transcribes audio via a batch job and cleans up both s3 objects', function (
     $start = $transcribeCommands[0]['params'];
 
     expect($start['LanguageCode'])->toBe('en-AU')
+        ->and($start)->not->toHaveKey('Tags')
         ->and($start['Media']['MediaFileUri'])->toBe("s3://test-bucket/{$put['Key']}")
         ->and($start['OutputBucketName'])->toBe('test-bucket')
         ->and($start['OutputKey'])->toStartWith('transcriptions/')
@@ -172,6 +173,45 @@ it('deep merges provider options into the job request last', function () {
         ->and($start['Settings']['ShowSpeakerLabels'])->toBeTrue()
         ->and($start['ContentRedaction']['RedactionType'])->toBe('PII');
 });
+
+it('sends configured job tags while preserving trusted provider option precedence', function (array $options, array $expectedTags) {
+    Sleep::fake();
+
+    $s3Commands = [];
+    $s3 = mockedS3(mockedHandler([
+        new Result([]),
+        new Result(['Body' => file_get_contents(__DIR__.'/../fixtures/transcript-plain.json')]),
+        new Result([]),
+        new Result([]),
+    ], $s3Commands));
+
+    $transcribeCommands = [];
+    $transcribe = mockedTranscribe(mockedHandler([
+        new Result([]),
+        new Result(['TranscriptionJob' => ['TranscriptionJobStatus' => 'COMPLETED']]),
+    ], $transcribeCommands));
+
+    (new TranscribeGateway($transcribe, $s3))->generateTranscription(
+        makeProvider(['tags' => ['Application' => 'stream', 'Environment' => 'staging']]),
+        'standard',
+        new Base64Audio(base64_encode('bytes'), 'audio/mpeg'),
+        providerOptions: $options,
+    );
+
+    expect($transcribeCommands[0]['params']['Tags'] ?? null)->toBe($expectedTags);
+})->with([
+    'configured ownership tags' => [[], [
+        ['Key' => 'Application', 'Value' => 'stream'],
+        ['Key' => 'Environment', 'Value' => 'staging'],
+    ]],
+    'trusted override retains other configured tags' => [
+        ['Tags' => [['Value' => 'plans']]],
+        [
+            ['Key' => 'Application', 'Value' => 'plans'],
+            ['Key' => 'Environment', 'Value' => 'staging'],
+        ],
+    ],
+]);
 
 it('requires a configured bucket', function () {
     $transcribeCommands = [];

@@ -137,6 +137,10 @@ final class TranscribeGateway implements TranscriptionGateway
             'OutputKey' => $transcriptKey,
         ];
 
+        foreach ($config['tags'] as $key => $value) {
+            $request['Tags'][] = ['Key' => $key, 'Value' => $value];
+        }
+
         if ($diarize) {
             $request['Settings'] = [
                 'ShowSpeakerLabels' => true,
