@@ -16,7 +16,7 @@ use Laravel\Ai\Contracts\Files\TranscribableAudio;
 use Laravel\Ai\Contracts\Gateway\TranscriptionGateway;
 use Laravel\Ai\Contracts\Providers\TranscriptionProvider;
 use Laravel\Ai\Responses\Data\Meta;
-use Laravel\Ai\Responses\Data\Usage;
+use Laravel\Ai\Responses\Data\TranscriptionUsage;
 use Laravel\Ai\Responses\TranscriptionResponse;
 use Throwable;
 
@@ -85,7 +85,7 @@ final class TranscribeGateway implements TranscriptionGateway
             return new TranscriptionResponse(
                 $parsed->text,
                 $parsed->segments,
-                new Usage,
+                new TranscriptionUsage,
                 new Meta($provider->name(), $model),
             );
         } finally {
