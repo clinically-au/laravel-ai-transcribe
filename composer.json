@@ -4,13 +4,13 @@
     "type": "library",
     "license": "MIT",
     "require": {
-        "php": "^8.4",
+        "php": "^8.5",
         "aws/aws-sdk-php": "^3.339",
-        "illuminate/support": "^12.0|^13.0",
-        "laravel/ai": "^0.10|^0.11"
+        "illuminate/support": "^13.0",
+        "laravel/ai": "^1.0"
     },
     "require-dev": {
-        "orchestra/testbench": "^10.0|^11.0",
+        "orchestra/testbench": "^11.0",
         "pestphp/pest": "^5.0",
         "pestphp/pest-plugin-laravel": "^5.0",
         "larastan/larastan": "^3.0",

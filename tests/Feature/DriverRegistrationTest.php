@@ -11,6 +11,7 @@ use Laravel\Ai\Ai;
 use Laravel\Ai\Events\TranscriptionGenerated;
 use Laravel\Ai\Files\Base64Audio;
 use Laravel\Ai\Prompts\TranscriptionPrompt;
+use Laravel\Ai\Responses\Data\TranscriptionUsage;
 use Laravel\Ai\Transcription;
 
 it('resolves the aws-transcribe driver from the ai manager', function () {
@@ -57,7 +58,9 @@ it('transcribes end to end through the sdk provider', function () {
     );
 
     expect((string) $response)->toBe('Hello there. Hi, how are you?')
-        ->and($response->segments)->toHaveCount(2);
+        ->and($response->segments)->toHaveCount(2)
+        ->and($response->usage)->toBeInstanceOf(TranscriptionUsage::class)
+        ->and($response->usage->audioSeconds)->toBeNull();
 
     Event::assertDispatched(TranscriptionGenerated::class);
 });

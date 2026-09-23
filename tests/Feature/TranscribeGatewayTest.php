@@ -14,6 +14,7 @@ use Laravel\Ai\Contracts\Files\TranscribableAudio;
 use Laravel\Ai\Contracts\Gateway\TranscriptionGateway;
 use Laravel\Ai\Contracts\Providers\TranscriptionProvider;
 use Laravel\Ai\Files\Base64Audio;
+use Laravel\Ai\Responses\Data\TranscriptionUsage;
 use Laravel\Ai\Responses\TranscriptionResponse;
 
 it('transcribes audio via a batch job and cleans up both s3 objects', function () {
@@ -49,6 +50,10 @@ it('transcribes audio via a batch job and cleans up both s3 objects', function (
     expect($response)->toBeInstanceOf(TranscriptionResponse::class)
         ->and($response->text)->toBe('Hello there. Hi, how are you?')
         ->and($response->segments)->toHaveCount(2)
+        ->and($response->usage)->toBeInstanceOf(TranscriptionUsage::class)
+        ->and($response->usage->inputTokens)->toBe(0)
+        ->and($response->usage->outputTokens)->toBe(0)
+        ->and($response->usage->audioSeconds)->toBeNull()
         ->and($response->meta->provider)->toBe('aws')
         ->and($response->meta->model)->toBe('standard');
 
@@ -257,6 +262,11 @@ it('rejects providers that are not the aws transcribe provider', function () {
         }
 
         public function useTranscriptionGateway(TranscriptionGateway $gateway): self
+        {
+            return $this;
+        }
+
+        public function withHeaders(array $headers): static
         {
             return $this;
         }
