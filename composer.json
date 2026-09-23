@@ -5,7 +5,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.5",
-        "aws/aws-sdk-php": "^3.339",
+        "aws/aws-sdk-php": "^3.369.1",
         "illuminate/support": "^13.0",
         "laravel/ai": "^1.0"
     },
