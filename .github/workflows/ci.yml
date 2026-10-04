@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: quality / static
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f # 2.35.5
+        with:
+          php-version: '8.5'
+          tools: composer:v2
+          coverage: none
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: vendor/bin/pint --test
+      - run: composer analyse
+
+  tests:
+    name: quality / tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f # 2.35.5
+        with:
+          php-version: '8.5'
+          tools: composer:v2
+          coverage: none
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Run tests
+        run: composer test -- --log-junit=build/junit.xml
+      - name: Enforce test-count floor
+        env:
+          MIN_TESTS: '22'
+        run: |
+          # The dollar sign in the single-quoted program belongs to PHP.
+          # shellcheck disable=SC2016
+          count=$(php -r '$x = simplexml_load_file("build/junit.xml"); echo (int) $x->testsuite[0]["tests"];')
+          echo "Pest ran $count tests (floor $MIN_TESTS)"
+          test "$count" -ge "$MIN_TESTS"
+      - name: Upload JUnit report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: junit-php-8.5
+          path: build/junit.xml
+          if-no-files-found: error
