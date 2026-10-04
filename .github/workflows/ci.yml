@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   static:
-    name: static
+    name: quality / static
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -31,7 +31,7 @@ jobs:
       - run: composer analyse
 
   tests:
-    name: tests
+    name: quality / tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
