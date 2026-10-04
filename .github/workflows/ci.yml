@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ['v*', '[0-9]*']
   pull_request:
 
 permissions:
@@ -62,3 +63,40 @@ jobs:
           name: junit-php-8.5
           path: build/junit.xml
           if-no-files-found: error
+
+  publish:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    needs: [static, tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - name: Package source
+        id: package
+        run: |
+          package_name=$(git show HEAD:composer.json | jq -er '.name | select(type == "string" and length > 0)')
+          printf 'package_name=%s\n' "$package_name" >> "$GITHUB_OUTPUT"
+          git archive --format=zip --prefix=package/ HEAD > "$RUNNER_TEMP/composer.zip"
+      - name: Retain Composer archive
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: composer-${{ github.ref_name }}
+          path: ${{ runner.temp }}/composer.zip
+          if-no-files-found: error
+          compression-level: 0
+      - name: Publish Composer archive
+        env:
+          PACKISTRY_TOKEN: ${{ secrets.PACKISTRY_TOKEN }}
+          PACKAGE_NAME: ${{ steps.package.outputs.package_name }}
+          VERSION: ${{ github.ref_name }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --connect-timeout 10 --max-time 120 \
+            --header "Authorization: Bearer $PACKISTRY_TOKEN" \
+            --form "file=@$RUNNER_TEMP/composer.zip;type=application/zip" \
+            --form-string "version=$VERSION" \
+            "https://repo.clindev.au/$PACKAGE_NAME"
